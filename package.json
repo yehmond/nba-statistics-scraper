@@ -1,0 +1,21 @@
+{
+  "name": "nba-scraper",
+  "version": "1.0.0",
+  "main": "scraper.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p .",
+    "start": "yarn run build -w"
+  },
+  "dependencies": {
+    "mongoose": "^5.8.11",
+    "puppeteer": "^2.1.0",
+    "typescript": "^3.7.5"
+  },
+  "devDependencies": {
+    "@types/mongodb": "^3.3.15",
+    "@types/mongoose": "^5.7.0",
+    "@types/puppeteer": "^2.0.0",
+    "dotenv": "^8.2.0"
+  }
+}
