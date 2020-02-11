@@ -1,7 +1,5 @@
 import {Db, MongoClient} from "mongodb";
-import {IPlayer, ISeasonStat, IShotChartStat} from "./Interfaces";
-import {promises as fsp} from 'fs';
-
+import {ISeasonStat, IShotChartStat} from "./Interfaces";
 
 export default class Database {
     client: MongoClient | undefined;
@@ -57,7 +55,7 @@ export default class Database {
             .toArray();
     }
 
-    async queryShotChart() {
+    async queryShotChart(): Promise<any[] | void> {
         this.checkNotNull(this.db);
         return this.db?.collection(this.SHOTCHART_COLLECTION)
             .find({}, {projection: {_id: 0}})
@@ -73,7 +71,7 @@ export default class Database {
         }
     }
 
-    async createPlayerSeasonStatIndex() {
+    async createPlayerSeasonStatIndex(): Promise<void> {
         this.checkNotNull(this.db);
         await this.db?.collection(this.PLAYER_SEASON_STAT_COLLECTION).createIndex({
             PLAYER_ID: 1,
@@ -91,7 +89,7 @@ export default class Database {
         }
     }
 
-    async createShotChartIndex() {
+    async createShotChartIndex(): Promise<void> {
         this.checkNotNull(this.db);
         await this.db?.collection(this.SHOTCHART_COLLECTION).createIndex({
             GAME_ID: 1,
@@ -112,7 +110,7 @@ export default class Database {
         await this.db?.collection(this.SHOTCHART_COLLECTION).insertOne(shotChartStat);
     }
 
-    async createLeagueAvgIndex() {
+    async createLeagueAvgIndex(): Promise<void> {
         this.checkNotNull(this.db);
         await this.db?.collection(this.LEAGUEAVG_COLLECTION).createIndex({
             YEAR: 1,
@@ -131,7 +129,7 @@ export default class Database {
         }
     }
 
-    logError(err: any) {
+    logError(err: any): void {
         if (err.code !== 11000) {
             throw new Error(err);
         }

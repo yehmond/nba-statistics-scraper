@@ -76,7 +76,7 @@ async function extractTeams(teams: ITeam[], startYear: number, endYear: number, 
 
         await database.createPlayerSeasonStatIndex();
         const teams = <ITeam[]>await database.queryTeamIDs();
-        await extractTeams(teams.splice(28), 1996, 2020, database, ppt);
+        await extractTeams(teams, 1996, 2020, database, ppt);
 
         await ppt.closeBrowser();
         await database.disconnect();

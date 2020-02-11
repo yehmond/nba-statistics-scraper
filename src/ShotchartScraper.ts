@@ -67,7 +67,7 @@ async function extractLeagueAvgFromJson(response: INBAResponse, season: string, 
     }
 }
 
-async function extractShotChart(teams: ITeam[], startYear: number, endYear: number, database: Database, ppt: MyPuppeteer) {
+async function saveShotChart(teams: ITeam[], startYear: number, endYear: number, database: Database, ppt: MyPuppeteer): Promise<void> {
     const validSeasons = generateValidSeasons(startYear, endYear);
     const promises = [];
     await fsp.mkdir("./shotcharts");
@@ -85,7 +85,7 @@ async function extractShotChart(teams: ITeam[], startYear: number, endYear: numb
 }
 
 
-async function storeShotChartFromDir(teams: any, database: Database) {
+async function addShotChartToDB(teams: any, database: Database): Promise<void> {
     for (const team of teams) {
         const files = await fsp.readdir(`./shotcharts/${team.name}/`);
         const promises = [];
@@ -109,9 +109,10 @@ async function storeShotChartFromDir(teams: any, database: Database) {
         await ppt.initPuppeteer();
 
         const teams = <ITeam[]>await database.queryTeamIDs();
-        await extractShotChart(teams, 1996, 2020, database, ppt);
+        await saveShotChart(teams, 1996, 2020, database, ppt);
 
         await ppt.closeBrowser();
+        await addShotChartToDB(teams, database);
         await database.disconnect();
     } catch (err) {
         console.error(err);
