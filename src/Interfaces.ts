@@ -3,6 +3,11 @@ export interface ITeam {
     id: string;
 }
 
+export interface IPlayer {
+    name: string;
+    id: string;
+}
+
 export interface INBAResponse {
     resource: string;
     parameters: {
@@ -77,5 +82,11 @@ export interface ISeasonStat {
     // NBA_FANTASY_PTS_RANK?: number;
     // DD2_RANK?: number;
     // TD3_RANK?: number;
+    [key: string]: string | number | undefined;
+}
+
+export interface IShotChartStat {
+    YEAR: string;
+    SEASON_TYPE: string;
     [key: string]: string | number | undefined;
 }

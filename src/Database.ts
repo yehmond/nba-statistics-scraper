@@ -1,5 +1,6 @@
 import {Db, MongoClient} from "mongodb";
-import {ISeasonStat} from "./Interfaces";
+import {IPlayer, ISeasonStat, IShotChartStat} from "./Interfaces";
+import {promises as fsp} from 'fs';
 
 
 export default class Database {
@@ -8,7 +9,10 @@ export default class Database {
     db: Db | undefined;
     url: string;
     PLAYERS_COLLECTION = "players";
+    PLAYER_SEASON_STAT_COLLECTION = "player_season_stat";
     TEAMS_COLLECTION = "teams";
+    SHOTCHART_COLLECTION = "shotchart";
+    LEAGUEAVG_COLLECTION = "league_average";
 
     constructor(url: string, dbName: string) {
         this.url = url;
@@ -33,6 +37,12 @@ export default class Database {
         console.log('✋ MongoDB disconnected...');
     }
 
+    checkNotNull(obj: any): void {
+        if (!obj) {
+            throw new Error(`The object ${obj} is null!`);
+        }
+    }
+
     async queryTeamIDs(): Promise<any[] | void> {
         this.checkNotNull(this.db);
         return this.db?.collection(this.TEAMS_COLLECTION)
@@ -40,39 +50,90 @@ export default class Database {
             .toArray();
     }
 
-    async addPlayer(id: string, name: string, playerSeasonStat: ISeasonStat | null): Promise<void> {
-        if (!(await this.db?.collection(this.PLAYERS_COLLECTION).findOne({id: id}))) {
-            const player = {
-                name,
-                id,
-                stat: playerSeasonStat ? [playerSeasonStat] : []
-            };
-            this.checkNotNull(this.db);
+    async queryPlayerIDs(): Promise<any[] | void> {
+        this.checkNotNull(this.db);
+        return this.db?.collection(this.PLAYERS_COLLECTION)
+            .find({}, {})
+            .toArray();
+    }
+
+    async queryShotChart() {
+        this.checkNotNull(this.db);
+        return this.db?.collection(this.SHOTCHART_COLLECTION)
+            .find({}, {projection: {_id: 0}})
+            .toArray();
+    }
+
+    async addPlayer(player: object): Promise<void> {
+        this.checkNotNull(this.db);
+        try {
             await this.db?.collection(this.PLAYERS_COLLECTION).insertOne(player);
-        }
-
-    }
-
-    checkNotNull(obj: any): void {
-        if (!obj) {
-            throw new Error(`The object ${obj} is null!`);
+        } catch (err) {
+            await this.logError(err);
         }
     }
 
-    async addPlayerSeasonStat(id: string, name: string, playerSeasonStat: ISeasonStat): Promise<void> {
-        const findQuery = {
-            id: id,
-            stat: {
-                $elemMatch: {
-                    YEAR: playerSeasonStat.YEAR,
-                    SEASON_TYPE: playerSeasonStat.SEASON_TYPE,
-                }
-            }
-        };
-        if (!(await this.db?.collection(this.PLAYERS_COLLECTION).findOne(findQuery))) {
-            const query = {id: id};
-            const newValue = {$push: {stat: playerSeasonStat}};
-            await this.db?.collection(this.PLAYERS_COLLECTION).updateOne(query, newValue);
+    async createPlayerSeasonStatIndex() {
+        this.checkNotNull(this.db);
+        await this.db?.collection(this.PLAYER_SEASON_STAT_COLLECTION).createIndex({
+            PLAYER_ID: 1,
+            YEAR: 1,
+            SEASON_TYPE: 1
+        }, {unique: true});
+    }
+
+    async addPlayerSeasonStat(playerSeasonStat: ISeasonStat): Promise<void> {
+        this.checkNotNull(this.db);
+        try {
+            await this.db?.collection(this.PLAYER_SEASON_STAT_COLLECTION).insertOne(playerSeasonStat);
+        } catch (err) {
+            await this.logError(err);
+        }
+    }
+
+    async createShotChartIndex() {
+        this.checkNotNull(this.db);
+        await this.db?.collection(this.SHOTCHART_COLLECTION).createIndex({
+            GAME_ID: 1,
+            SEASON_TYPE: 1,
+            TEAM_ID: 1,
+            PLAYER_ID: 1,
+            PERIOD: 1,
+            MINUTES_REMAINING: 1,
+            SECONDS_REMAINING: 1,
+            SHOT_ATTEMPTED_FLAG: 1,
+            SHOT_MADE_FLAG: 1,
+            LOC_X: 1,
+            LOC_Y: 1,
+        }, {unique: true});
+    }
+
+    async addShotChart(shotChartStat: IShotChartStat): Promise<void> {
+        await this.db?.collection(this.SHOTCHART_COLLECTION).insertOne(shotChartStat);
+    }
+
+    async createLeagueAvgIndex() {
+        this.checkNotNull(this.db);
+        await this.db?.collection(this.LEAGUEAVG_COLLECTION).createIndex({
+            YEAR: 1,
+            SEASON_TYPE: 1,
+            SHOT_ZONE_BASIC: 1,
+            SHOT_ZONE_AREA: 1,
+            SHOT_ZONE_RANGE: 1
+        }, {unique: true});
+    }
+
+    async addLeagueAvg(leagueAvgStat: any): Promise<void> {
+        try {
+            await this.db?.collection(this.LEAGUEAVG_COLLECTION).insertOne(leagueAvgStat);
+        } catch (err) {
+            this.logError(err);
+        }
+    }
+
+    logError(err: any) {
+        if (err.code !== 11000) {
+            throw new Error(err);
         }
     }
 }
