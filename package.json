@@ -10,15 +10,14 @@
   "dependencies": {
     "cli-progress": "^3.6.0",
     "mongodb": "^3.5.2",
-    "mongoose": "^5.8.11",
-    "puppeteer": "^2.1.0",
-    "typescript": "^3.7.5"
+    "puppeteer": "^2.1.0"
   },
   "devDependencies": {
     "@types/cli-progress": "^3.4.2",
     "@types/mongodb": "^3.3.15",
     "@types/mongoose": "^5.7.0",
     "@types/puppeteer": "^2.0.0",
-    "dotenv": "^8.2.0"
+    "dotenv": "^8.2.0",
+    "typescript": "^3.7.5"
   }
 }
