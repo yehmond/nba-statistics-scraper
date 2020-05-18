@@ -1,8 +1,8 @@
-import {INBAResponse, IShotChartStat, ITeam} from "./Interfaces";
+import { INBAResponse, IShotChartStat, ITeam } from "./Interfaces";
 import Database from "./Database";
-import {buildQuery, generateValidSeasons} from "./Util";
+import { buildQuery, generateValidSeasons } from "./Util";
 import MyPuppeteer from "./MyPuppeteer";
-import {promises as fsp} from "fs";
+import { promises as fsp } from "fs";
 
 require('dotenv').config();
 
@@ -22,7 +22,6 @@ async function getShotChartJson(teamID: string, season: string, seasonType: stri
         TeamID: teamID,
         SeasonType: seasonType
     });
-
     const page = await ppt.newPage(url);
 
     return page
@@ -38,7 +37,7 @@ async function getShotChartJson(teamID: string, season: string, seasonType: stri
 }
 
 async function extractShotChartFromJson(response: INBAResponse, season: string, database: Database): Promise<void> {
-    const {headers, rowSet} = response.resultSets[0];
+    const { headers, rowSet } = response.resultSets[0];
     for (const row of rowSet) {
         const shotChartStat: IShotChartStat = {
             YEAR: season,
@@ -53,7 +52,7 @@ async function extractShotChartFromJson(response: INBAResponse, season: string, 
 }
 
 async function extractLeagueAvgFromJson(response: INBAResponse, season: string, database: Database): Promise<void> {
-    const {headers, rowSet} = response.resultSets[1];
+    const { headers, rowSet } = response.resultSets[1];
     for (const row of rowSet) {
         const leagueAvgStat: any = {
             YEAR: season,
@@ -77,11 +76,10 @@ async function saveShotChart(teams: ITeam[], startYear: number, endYear: number,
         for (const season of validSeasons) {
             for (const seasonType of ["Pre Season", "Regular Season", "Playoffs"]) {
                 const json = await getShotChartJson(team.id, season, seasonType, ppt);
-                promises.push(fsp.writeFile(`./shotcharts/${team.name}/${team.id}_${season}_${seasonType}.json`, JSON.stringify(json)));
+                await fsp.writeFile(`./shotcharts/${team.name}/${team.id}_${season}_${seasonType}.json`, JSON.stringify(json));
             }
         }
     }
-    await Promise.all(promises);
 }
 
 

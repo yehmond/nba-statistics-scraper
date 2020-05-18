@@ -14,7 +14,6 @@ async function getPlayerJson(teamID: string, season: string, seasonType: string,
         Season: season,
         SeasonType: seasonType
     });
-
     const page = await ppt.newPage(url);
 
     return page
