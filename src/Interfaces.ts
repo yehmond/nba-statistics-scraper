@@ -3,11 +3,6 @@ export interface ITeam {
     id: string;
 }
 
-export interface IPlayer {
-    name: string;
-    id: string;
-}
-
 export interface INBAResponse {
     resource: string;
     parameters: {
@@ -19,12 +14,6 @@ export interface INBAResponse {
         headers: string[];
         rowSet: (string | number)[][];
     }>;
-}
-
-export interface ISeasonStat {
-    YEAR: string;
-    SEASON_TYPE: string;
-    [key: string]: string | number | undefined;
 }
 
 export interface IShotChartStat {
